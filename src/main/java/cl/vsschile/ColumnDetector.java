@@ -321,10 +321,80 @@ public class ColumnDetector {
     }
     
     /**
-     * BSM CATERING - formato genérico
+     * BSM CATERING
+     * Header en fila 19: No, Product Code, Description, Part Number, Brand,
+     *                    Weight, Unit, Package, Contract Price, Quantity,
+     *                    Unit Price ( USD ), Discount %, VAT %, Total Price,
+     *                    MD, sDoC, Vendor Remarks
      */
     private static void detectBSMColumns(Sheet sheet, ColumnMapping mapping) {
-        detectGenericColumns(sheet, mapping);
+        Row row = sheet.getRow(18); // Fila 19 (índice 18)
+        if (row != null) {
+            mapping.headerRow = 18;
+            
+            // Primero llenar columnNames con todos los valores
+            for (int i = 0; i < 25; i++) {
+                Cell cell = row.getCell(i);
+                String value = getCellValueAsString(cell);
+                if (value != null && !value.trim().isEmpty()) {
+                    mapping.columnNames.add(value);
+                } else {
+                    mapping.columnNames.add("");
+                }
+            }
+            
+            // Luego mapear columnas
+            for (int i = 0; i < 25; i++) {
+                Cell cell = row.getCell(i);
+                if (cell != null) {
+                    String value = getCellValueAsString(cell);
+                    if (value != null && !value.trim().isEmpty()) {
+                        String normalized = value.toUpperCase().trim();
+                        
+                        // Capturar estilo de la celda
+                        CellStyleInfo styleInfo = CellStyleInfo.fromCell(cell);
+                        mapping.columnStyles.put(i, styleInfo);
+                        
+                        // Mapear columnas conocidas
+                        if (normalized.equals("NO")) {
+                            mapping.columns.put("LINE_NO", i);
+                        } else if (normalized.contains("PRODUCT CODE")) {
+                            mapping.columns.put("PRODUCT_CODE", i);
+                        } else if (normalized.equals("DESCRIPTION")) {
+                            mapping.columns.put("ITEM_NAME", i);
+                        } else if (normalized.contains("PART NUMBER")) {
+                            mapping.columns.put("ITEM_CODE", i);
+                        } else if (normalized.equals("BRAND")) {
+                            mapping.columns.put("BRAND", i);
+                        } else if (normalized.equals("WEIGHT")) {
+                            mapping.columns.put("WEIGHT", i);
+                        } else if (normalized.equals("UNIT")) {
+                            mapping.columns.put("UOM", i);
+                        } else if (normalized.equals("PACKAGE")) {
+                            mapping.columns.put("PACKAGE", i);
+                        } else if (normalized.contains("CONTRACT PRICE")) {
+                            mapping.columns.put("CONTRACT_PRICE", i);
+                        } else if (normalized.equals("QUANTITY")) {
+                            mapping.columns.put("QUANTITY", i);
+                        } else if (normalized.contains("UNIT PRICE")) {
+                            mapping.columns.put("UNIT_PRICE", i);
+                        } else if (normalized.contains("DISCOUNT")) {
+                            mapping.columns.put("DISCOUNT", i);
+                        } else if (normalized.contains("VAT")) {
+                            mapping.columns.put("VAT", i);
+                        } else if (normalized.contains("TOTAL PRICE")) {
+                            mapping.columns.put("TOTAL", i);
+                        } else if (normalized.equals("MD")) {
+                            mapping.columns.put("MD", i);
+                        } else if (normalized.contains("SDOC")) {
+                            mapping.columns.put("SDOC", i);
+                        } else if (normalized.contains("VENDOR REMARKS")) {
+                            mapping.columns.put("VENDOR_REMARKS", i);
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /**

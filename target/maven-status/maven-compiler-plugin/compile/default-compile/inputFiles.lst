@@ -1,12 +1,13 @@
-/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/ExcelReportGenerator.java
-/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/RowData.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/CotizacionOrganizer.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/ArchivoColorSaver.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/CotizacionViewerApp.java
-/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/TemplateRecreator.java
-/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/CellStyleInfo.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/ColumnDetectorTest.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/ColumnDetector.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/BrokerExcelGenerator.java
+/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/ExcelReportGenerator.java
+/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/RowData.java
+/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/TemplateRecreator.java
+/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/CellStyleInfo.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/FormatoSaver.java
+/Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/BrokerMetadataExtractor.java
 /Users/albertosanmartin/Documents/VSS-COTIZACIONES/cotizacion-organizer/src/main/java/cl/vsschile/FormatoDatabaseManager.java

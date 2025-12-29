@@ -104,7 +104,7 @@ public class FormatoSaver {
         File[] files = brokerDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 String lower = name.toLowerCase();
-                return lower.endsWith(".xlsx") || lower.endsWith(".xls");
+                return lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".xlsm");
             }
         });
         
@@ -129,10 +129,21 @@ public class FormatoSaver {
         System.out.println("  ✓ Columnas detectadas: " + mapping.columns.size());
         System.out.println("  ✓ Header en fila: " + (mapping.headerRow + 1));
         
+        // Extraer metadata
+        List<BrokerMetadataExtractor.MetadataField> metadata = extractMetadataFromFile(sampleFile, brokerName);
+        System.out.println("  ✓ Campos de metadata detectados: " + metadata.size());
+        
         // Guardar en base de datos
         try {
             int formatoId = dbManager.saveFormato(mapping, sampleFile.getName());
             System.out.println("  ✓ Guardado en BD (formato_id: " + formatoId + ")");
+            
+            // Guardar metadata
+            if (!metadata.isEmpty()) {
+                dbManager.saveMetadata(formatoId, metadata);
+                System.out.println("  ✓ Metadata guardada en BD");
+            }
+            
             return true;
         } catch (SQLException e) {
             System.err.println("  ✗ Error guardando en BD: " + e.getMessage());
@@ -146,7 +157,8 @@ public class FormatoSaver {
         Workbook workbook = null;
         
         try {
-            if (file.getName().toLowerCase().endsWith(".xlsx")) {
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
                 workbook = new XSSFWorkbook(fis);
             } else {
                 workbook = new HSSFWorkbook(fis);
@@ -154,6 +166,30 @@ public class FormatoSaver {
             
             Sheet sheet = workbook.getSheetAt(0);
             return ColumnDetector.detectColumns(sheet, brokerName);
+            
+        } finally {
+            if (workbook != null) {
+                workbook.close();
+            }
+            fis.close();
+        }
+    }
+    
+    private List<BrokerMetadataExtractor.MetadataField> extractMetadataFromFile(File file, String brokerName) 
+            throws Exception {
+        FileInputStream fis = new FileInputStream(file);
+        Workbook workbook = null;
+        
+        try {
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
+                workbook = new XSSFWorkbook(fis);
+            } else {
+                workbook = new HSSFWorkbook(fis);
+            }
+            
+            Sheet sheet = workbook.getSheetAt(0);
+            return BrokerMetadataExtractor.extractMetadata(sheet, brokerName);
             
         } finally {
             if (workbook != null) {

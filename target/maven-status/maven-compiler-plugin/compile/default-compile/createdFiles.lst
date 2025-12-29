@@ -1,4 +1,5 @@
 cl/vsschile/FormatoDatabaseManager$FormatoInfo.class
+cl/vsschile/FormatoDatabaseManager$MetadataInfo.class
 cl/vsschile/CotizacionViewerApp$ColumnFormat.class
 cl/vsschile/ColumnDetectorTest.class
 cl/vsschile/CotizacionViewerApp.class
@@ -12,6 +13,7 @@ cl/vsschile/FormatoSaver.class
 cl/vsschile/TemplateRecreator.class
 cl/vsschile/ColumnDetectorTest$2.class
 cl/vsschile/CotizacionViewerApp$5.class
+cl/vsschile/BrokerMetadataExtractor.class
 cl/vsschile/FormatoSaver$1.class
 cl/vsschile/RowData.class
 cl/vsschile/CotizacionViewerApp$BrokerFormat.class
@@ -30,3 +32,4 @@ cl/vsschile/TemplateRecreator$FormatInfo.class
 cl/vsschile/FormatoDatabaseManager$ColumnaInfo.class
 cl/vsschile/CotizacionViewerApp$1.class
 cl/vsschile/CotizacionViewerApp$4.class
+cl/vsschile/BrokerMetadataExtractor$MetadataField.class

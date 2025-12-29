@@ -51,7 +51,7 @@ public class ColumnDetectorTest {
         File[] files = brokerDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 String lower = name.toLowerCase();
-                return lower.endsWith(".xlsx") || lower.endsWith(".xls");
+                return lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".xlsm");
             }
         });
         
@@ -117,7 +117,8 @@ public class ColumnDetectorTest {
         Workbook workbook = null;
         
         try {
-            if (file.getName().toLowerCase().endsWith(".xlsx")) {
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
                 workbook = new XSSFWorkbook(fis);
             } else {
                 workbook = new HSSFWorkbook(fis);
@@ -140,7 +141,8 @@ public class ColumnDetectorTest {
         Workbook workbook = null;
         
         try {
-            if (file.getName().toLowerCase().endsWith(".xlsx")) {
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
                 workbook = new XSSFWorkbook(fis);
             } else {
                 workbook = new HSSFWorkbook(fis);

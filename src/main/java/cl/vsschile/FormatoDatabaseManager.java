@@ -431,6 +431,99 @@ public class FormatoDatabaseManager {
     }
     
     /**
+     * Guarda metadata de un broker
+     */
+    public void saveMetadata(int formatoId, List<BrokerMetadataExtractor.MetadataField> metadata) 
+            throws SQLException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+            
+            // Eliminar metadata anterior de este formato
+            ps = conn.prepareStatement("DELETE FROM broker_metadata WHERE formato_id = ?");
+            ps.setInt(1, formatoId);
+            ps.executeUpdate();
+            ps.close();
+            
+            // Insertar nueva metadata
+            ps = conn.prepareStatement(
+                "INSERT INTO broker_metadata (formato_id, seccion, campo_nombre, campo_valor, " +
+                "fila_origen, columna_origen, letra_columna) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+            
+            for (BrokerMetadataExtractor.MetadataField field : metadata) {
+                ps.setInt(1, formatoId);
+                ps.setString(2, field.seccion);
+                ps.setString(3, field.campoNombre);
+                ps.setString(4, field.campoValor);
+                ps.setInt(5, field.filaOrigen);
+                ps.setInt(6, field.columnaOrigen);
+                ps.setString(7, field.letraColumna);
+                ps.addBatch();
+            }
+            
+            ps.executeBatch();
+            conn.commit();
+            
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    // Ignorar
+                }
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+            }
+            closeStatement(ps);
+            closeConnection(conn);
+        }
+    }
+    
+    /**
+     * Obtiene la metadata de un formato
+     */
+    public List<MetadataInfo> getMetadataByFormato(int formatoId) throws SQLException {
+        List<MetadataInfo> metadata = new ArrayList<MetadataInfo>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(
+                "SELECT * FROM broker_metadata WHERE formato_id = ? " +
+                "ORDER BY seccion, fila_origen, columna_origen"
+            );
+            ps.setInt(1, formatoId);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                MetadataInfo info = new MetadataInfo();
+                info.metadataId = rs.getInt("metadata_id");
+                info.formatoId = rs.getInt("formato_id");
+                info.seccion = rs.getString("seccion");
+                info.campoNombre = rs.getString("campo_nombre");
+                info.campoValor = rs.getString("campo_valor");
+                info.filaOrigen = rs.getInt("fila_origen");
+                info.columnaOrigen = rs.getInt("columna_origen");
+                info.letraColumna = rs.getString("letra_columna");
+                metadata.add(info);
+            }
+            
+            return metadata;
+        } finally {
+            closeResources(conn, ps, rs);
+        }
+    }
+    
+    /**
      * Clase para información de formato
      */
     public static class FormatoInfo {
@@ -482,6 +575,25 @@ public class FormatoDatabaseManager {
             }
             
             return sb.toString();
+        }
+    }
+    
+    /**
+     * Clase para información de metadata
+     */
+    public static class MetadataInfo {
+        public int metadataId;
+        public int formatoId;
+        public String seccion;
+        public String campoNombre;
+        public String campoValor;
+        public int filaOrigen;
+        public int columnaOrigen;
+        public String letraColumna;
+        
+        public String toString() {
+            return String.format("[%s] %s = %s (Fila: %d, Col: %s)",
+                seccion, campoNombre, campoValor, filaOrigen + 1, letraColumna);
         }
     }
 }
