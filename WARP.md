@@ -1,176 +1,176 @@
 # WARP.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+Este archivo proporciona orientación a WARP (warp.dev) al trabajar con código en este repositorio.
 
-## Project Overview
+## Descripción del Proyecto
 
 Sistema de organización y visualización de cotizaciones para VSS (Valparaiso Ship Services). Procesa archivos Excel de múltiples brokers (MCTC, Oceanic, CMA CGM, Garrets, Procureship, BSM), extrae información de vessels/clientes, organiza cotizaciones por cliente y visualiza datos con formatos originales preservados.
 
-## Build & Compilation
+## Compilación
 
 ```bash
-# Compile the project
+# Compilar el proyecto
 mvn clean compile
 
-# Build package
+# Construir el paquete
 mvn clean package
 ```
 
-## Running Applications
+## Ejecución de Aplicaciones
 
-### Main Applications
+### Aplicaciones Principales
 
-1. **Cotization Organizer** (organize quotations by client)
+1. **Organizador de Cotizaciones** (organiza cotizaciones por cliente)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.CotizacionOrganizer" \
-  -Dexec.args="<path-to-BROKERS-directory>"
+  -Dexec.args="<ruta-al-directorio-BROKERS>"
 ```
 
-2. **Quotation Viewer** (JavaFX GUI to visualize quotations)
+2. **Visor de Cotizaciones** (interfaz JavaFX para visualizar cotizaciones)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.CotizacionViewerApp"
-# Or use the script:
+# O usar el script:
 ./run-viewer.sh
 ```
 
-3. **Column Detector Test** (analyze and test column detection)
+3. **Prueba de Detector de Columnas** (analiza y prueba la detección de columnas)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.ColumnDetectorTest" \
-  -Dexec.args="<path-to-BROKERS-directory>"
+  -Dexec.args="<ruta-al-directorio-BROKERS>"
 ```
 
-4. **Format Saver** (save broker formats to database)
+4. **Guardador de Formatos** (guarda formatos de brokers en base de datos)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.FormatoSaver" \
-  -Dexec.args="<path-to-BROKERS-directory> [db-password]"
+  -Dexec.args="<ruta-al-directorio-BROKERS> [contraseña-bd]"
 ```
 
-5. **Archive Color Saver** (save individual file color information)
+5. **Guardador de Colores de Archivos** (guarda información de colores de archivos individuales)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.ArchivoColorSaver" \
-  -Dexec.args="<path-to-BROKERS-directory>"
+  -Dexec.args="<ruta-al-directorio-BROKERS>"
 ```
 
-6. **Template Recreator** (recreate broker Excel templates)
+6. **Recreador de Plantillas** (recrea plantillas Excel de brokers)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.TemplateRecreator"
 ```
 
-7. **Excel Report Generator** (generate broker analysis reports)
+7. **Generador de Reportes Excel** (genera reportes de análisis de brokers)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.ExcelReportGenerator"
 ```
 
-8. **Broker Excel Generator** (generate sample broker files)
+8. **Generador de Excel de Brokers** (genera archivos de ejemplo de brokers)
 ```bash
 mvn exec:java -Dexec.mainClass="cl.vsschile.BrokerExcelGenerator"
 ```
 
-## Architecture
+## Arquitectura
 
-### Core Components
+### Componentes Principales
 
 **1. CotizacionOrganizer**
-- Main entry point for processing quotations
-- Scans broker directories, extracts metadata (vessel name, IMO, quotation number)
-- Organizes files by client into `cotizaciones-por-cliente/` directory
-- Generates `metadata.txt` for each client folder
+- Punto de entrada principal para procesar cotizaciones
+- Escanea directorios de brokers, extrae metadata (nombre del vessel, IMO, número de cotización)
+- Organiza archivos por cliente en el directorio `cotizaciones-por-cliente/`
+- Genera `metadata.txt` para cada carpeta de cliente
 
 **2. ColumnDetector**
-- Detects header rows and column mappings for each broker format
-- Returns `ColumnMapping` objects containing:
-  - `headerRow`: Row index where headers are located
-  - `columns`: Map of standard field names to column indices
-  - `columnStyles`: Cell style information (colors, fonts, borders)
-- Broker-specific detection methods for each supported format
+- Detecta filas de encabezado y mapeo de columnas para cada formato de broker
+- Retorna objetos `ColumnMapping` que contienen:
+  - `headerRow`: Índice de la fila donde están los encabezados
+  - `columns`: Mapa de nombres de campos estándar a índices de columnas
+  - `columnStyles`: Información de estilo de celdas (colores, fuentes, bordes)
+- Métodos de detección específicos por broker para cada formato soportado
 
 **3. FormatoDatabaseManager**
-- PostgreSQL interface for storing/retrieving broker formats
-- Database: `sistema_cotizacion_2025` (localhost:5432, user: postgres)
-- Tables: `brokers`, `broker_formatos`, `formato_columnas`, `cotizaciones_archivos`, `archivo_colores`
-- Views: `v_formatos_activos`, `v_columnas_detalladas`, `v_archivos_cotizaciones`, etc.
+- Interfaz PostgreSQL para almacenar/recuperar formatos de brokers
+- Base de datos: `sistema_cotizacion_2025` (localhost:5432, usuario: postgres)
+- Tablas: `brokers`, `broker_formatos`, `formato_columnas`, `cotizaciones_archivos`, `archivo_colores`
+- Vistas: `v_formatos_activos`, `v_columnas_detalladas`, `v_archivos_cotizaciones`, etc.
 
 **4. CotizacionViewerApp (JavaFX)**
-- GUI application to visualize quotations with original broker formatting
-- Loads broker formats from database
-- Applies colors, fonts, and styles dynamically based on DB configuration
-- Uses `RowData` for dynamic column handling
+- Aplicación GUI para visualizar cotizaciones con el formato original del broker
+- Carga formatos de broker desde la base de datos
+- Aplica colores, fuentes y estilos dinámicamente basado en configuración de BD
+- Usa `RowData` para manejo dinámico de columnas
 
-### Data Flow
+### Flujo de Datos
 
 ```
-Excel Files → CotizacionOrganizer → Organized by Client
-              ↓
-         ColumnDetector → Detect Format
-              ↓
-         FormatoSaver → PostgreSQL
-              ↓
-    CotizacionViewerApp → Visualize with Format
+Archivos Excel → CotizacionOrganizer → Organizado por Cliente
+                 ↓
+            ColumnDetector → Detecta Formato
+                 ↓
+            FormatoSaver → PostgreSQL
+                 ↓
+       CotizacionViewerApp → Visualiza con Formato
 ```
 
-### Broker Support
+### Soporte de Brokers
 
-The system auto-detects these broker formats:
-- **MCTC MARINE LTD**: Header row 10, fields include vessel name, IMO, quotation number
-- **OCEANIC CATERING LTD**: Header row 13, vessel name and request number
-- **CMA CGM**: Header row 19, vessel name
-- **GARRETS INTERNATIONAL LTD**: Header row 25, RFQ number and vessel
-- **PROCURESHIP**: Header row 14, vessel, IMO, requisition number
-- **BSM**: Custom detection logic
-- **Generic**: Fallback auto-detection for unknown formats
+El sistema detecta automáticamente estos formatos de brokers:
+- **MCTC MARINE LTD**: Encabezado en fila 10, incluye nombre de vessel, IMO, número de cotización
+- **OCEANIC CATERING LTD**: Encabezado en fila 13, nombre de vessel y número de solicitud
+- **CMA CGM**: Encabezado en fila 19, nombre de vessel
+- **GARRETS INTERNATIONAL LTD**: Encabezado en fila 25, número RFQ y vessel
+- **PROCURESHIP**: Encabezado en fila 14, vessel, IMO, número de requisición
+- **BSM**: Lógica de detección personalizada
+- **Genérico**: Auto-detección alternativa para formatos desconocidos
 
-### Standard Field Mapping
+### Mapeo de Campos Estándar
 
-Fields mapped across all broker formats:
+Campos mapeados en todos los formatos de brokers:
 - `ITEM_NAME`, `ITEM_CODE`, `CATEGORY`, `DESCRIPTION`
-- `QUANTITY`, `UOM` (unit of measure), `UNIT_PRICE`, `TOTAL`
+- `QUANTITY`, `UOM` (unidad de medida), `UNIT_PRICE`, `TOTAL`
 - `BRAND`, `DISCOUNT`, `SUPPLIER_COMMENTS`
 
-### Key Classes
+### Clases Clave
 
-- `QuotationInfo`: Metadata container (vessel, IMO, quotation number, broker)
-- `ColumnMapping`: Column structure and style info for a broker format
-- `CellStyleInfo`: Cell formatting (background color, font, borders)
-- `RowData`: Dynamic row data for JavaFX TableView
+- `QuotationInfo`: Contenedor de metadata (vessel, IMO, número de cotización, broker)
+- `ColumnMapping`: Estructura de columnas e información de estilo para un formato de broker
+- `CellStyleInfo`: Formato de celda (color de fondo, fuente, bordes)
+- `RowData`: Datos de fila dinámicos para JavaFX TableView
 
-## Database
+## Base de Datos
 
-**PostgreSQL Database:** `sistema_cotizacion_2025`
-- **Connection:** localhost:5432, user: postgres, password: (empty or provided)
-- **Key Tables:** See ESTRUCTURA_BD.md for full schema
-- **Views:** Pre-built queries for common operations
+**Base de Datos PostgreSQL:** `sistema_cotizacion_2025`
+- **Conexión:** localhost:5432, usuario: postgres, contraseña: (vacía o proporcionada)
+- **Tablas Principales:** Ver ESTRUCTURA_BD.md para el esquema completo
+- **Vistas:** Consultas pre-construidas para operaciones comunes
 
-**Testing Connection:**
+**Probar Conexión:**
 ```bash
 psql -U postgres -d sistema_cotizacion_2025
 ```
 
-## Adding New Broker Support
+## Agregar Soporte para Nuevo Broker
 
-1. Add broker detection in `CotizacionOrganizer.extractQuotationInfo()`
-2. Create column detection method in `ColumnDetector.detect*Columns()`
-3. Add extraction logic in `CotizacionOrganizer.extract*Info()`
-4. Run `FormatoSaver` to save format to database
+1. Agregar detección de broker en `CotizacionOrganizer.extractQuotationInfo()`
+2. Crear método de detección de columnas en `ColumnDetector.detect*Columns()`
+3. Agregar lógica de extracción en `CotizacionOrganizer.extract*Info()`
+4. Ejecutar `FormatoSaver` para guardar formato en la base de datos
 
-## File Structure
+## Estructura de Archivos
 
-- `src/main/java/cl/vsschile/` - Java source files
-- `cotizaciones-por-cliente/` - Output directory (organized quotations)
-- `ESTRUCTURA_BD.md` - Database schema documentation
-- `README.md` - Main usage documentation
-- `README_VIEWER.md` - JavaFX viewer documentation
-- `WORKFLOW_VIEWER.md` - Detailed viewer workflow
+- `src/main/java/cl/vsschile/` - Archivos fuente Java
+- `cotizaciones-por-cliente/` - Directorio de salida (cotizaciones organizadas)
+- `ESTRUCTURA_BD.md` - Documentación del esquema de base de datos
+- `README.md` - Documentación principal de uso
+- `README_VIEWER.md` - Documentación del visor JavaFX
+- `WORKFLOW_VIEWER.md` - Flujo de trabajo detallado del visor
 
-## Dependencies
+## Dependencias
 
-- Apache POI 3.17 (Excel processing)
-- PostgreSQL 9.4.1212 (JDBC driver)
-- JavaFX 17 (GUI framework)
-- Java 17 (compiler target)
+- Apache POI 3.17 (procesamiento de Excel)
+- PostgreSQL 9.4.1212 (driver JDBC)
+- JavaFX 17 (framework GUI)
+- Java 17 (target del compilador)
 
-## Notes
+## Notas
 
-- Files are **copied**, never moved or modified
-- System is safe to run multiple times
-- Supports both `.xls` and `.xlsx` formats
-- Output preserves original filenames with broker prefix
+- Los archivos son **copiados**, nunca movidos o modificados
+- El sistema es seguro para ejecutar múltiples veces
+- Soporta formatos `.xls` y `.xlsx`
+- La salida preserva los nombres de archivo originales con prefijo del broker
