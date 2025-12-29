@@ -138,19 +138,15 @@ public class BrokerMetadataExtractor {
     private static List<MetadataField> extractOceanicMetadata(Sheet sheet) {
         List<MetadataField> metadata = new ArrayList<MetadataField>();
         
-        // Sección: Request Information
-        addField(metadata, sheet, "Request Information", "Vessel", 1, 1);
-        addField(metadata, sheet, "Request Information", "Quotation Request Number", 2, 1);
-        addField(metadata, sheet, "Request Information", "Port", 3, 1);
-        addField(metadata, sheet, "Request Information", "ETA Date", 4, 1);
-        addField(metadata, sheet, "Request Information", "Request Date", 5, 1);
+        // Sección: Company Information
+        addField(metadata, sheet, "Company Information", "Company Name", 0, 0);
         
-        // Sección: Supplier Information
-        addField(metadata, sheet, "Supplier Information", "Supplier Name", 7, 1);
-        addField(metadata, sheet, "Supplier Information", "Contact Person", 8, 1);
-        addField(metadata, sheet, "Supplier Information", "Email", 9, 1);
-        addField(metadata, sheet, "Supplier Information", "Phone", 10, 1);
-        addField(metadata, sheet, "Supplier Information", "Delivery Terms", 11, 1);
+        // Sección: Request Information
+        addField(metadata, sheet, "Request Information", "Quotation Request Number", 4, 2);
+        addField(metadata, sheet, "Request Information", "Quotation Request Date", 5, 2);
+        addField(metadata, sheet, "Request Information", "Est. Delivery Date", 6, 2);
+        addField(metadata, sheet, "Request Information", "Loading Port", 7, 2);
+        addField(metadata, sheet, "Request Information", "Vessel", 8, 2);
         
         return metadata;
     }
@@ -162,22 +158,17 @@ public class BrokerMetadataExtractor {
     private static List<MetadataField> extractCMAMetadata(Sheet sheet) {
         List<MetadataField> metadata = new ArrayList<MetadataField>();
         
-        // Sección: Document Header
-        addField(metadata, sheet, "Document Header", "Document Title", 0, 0);
-        addField(metadata, sheet, "Document Header", "Vessel", 2, 1);
-        addField(metadata, sheet, "Document Header", "Port", 3, 1);
-        addField(metadata, sheet, "Document Header", "ETA", 4, 1);
-        addField(metadata, sheet, "Document Header", "Request Number", 5, 1);
-        addField(metadata, sheet, "Document Header", "Request Date", 6, 1);
+        // Sección: Company Details
+        addField(metadata, sheet, "Company Details", "RFQ Label", 0, 1);
+        addField(metadata, sheet, "Company Details", "Company Name", 3, 0);
+        addField(metadata, sheet, "Company Details", "Company Info", 4, 0);
         
-        // Sección: Supplier Information
-        addField(metadata, sheet, "Supplier Information", "Supplier Name", 9, 1);
-        addField(metadata, sheet, "Supplier Information", "Contact", 10, 1);
-        addField(metadata, sheet, "Supplier Information", "Email", 11, 1);
-        addField(metadata, sheet, "Supplier Information", "Phone", 12, 1);
-        addField(metadata, sheet, "Supplier Information", "Currency", 14, 1);
-        addField(metadata, sheet, "Supplier Information", "Payment Terms", 15, 1);
-        addField(metadata, sheet, "Supplier Information", "Delivery Terms", 16, 1);
+        // Sección: Vendor Details
+        addField(metadata, sheet, "Vendor Details", "Vendor Name", 12, 3);
+        addField(metadata, sheet, "Vendor Details", "Vendor Address", 13, 3);
+        addField(metadata, sheet, "Vendor Details", "Vendor City", 14, 3);
+        addField(metadata, sheet, "Vendor Details", "Vendor Phone", 15, 3);
+        addField(metadata, sheet, "Vendor Details", "Vendor Email", 16, 3);
         
         return metadata;
     }
