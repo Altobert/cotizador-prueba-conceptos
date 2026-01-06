@@ -281,17 +281,79 @@ COMMENT ON VIEW v_archivos_cotizaciones IS 'Lista de archivos procesados con est
 
 
 -- ============================================================================
--- DATOS INICIALES (OPCIONAL)
+-- DATOS ACTUALES DE LAS TABLAS
+-- Generado: 2025-12-28
 -- ============================================================================
 
--- Insertar brokers iniciales si es necesario
--- INSERT INTO brokers (broker_name, descripcion) VALUES 
---     ('MCTC MARINE LTD', 'Marine Catering and Trading Company'),
---     ('OCEANIC CATERING LTD', 'Oceanic Catering Services'),
---     ('CMA CGM', 'CMA CGM Group'),
---     ('GARRETS INTERNATIONAL LTD', 'Garrets International Limited'),
---     ('PROCURESHIP', 'Procureship Services'),
---     ('BSM CATERING', 'Bernhard Schulte Shipmanagement - Catering Services');
+-- ============================================================================
+-- DATOS: brokers (11 registros)
+-- ============================================================================
+INSERT INTO brokers (broker_id, broker_name, activo) VALUES 
+    (1, 'OCEANIC CATERING LTD', true),
+    (2, 'MCTC MARINE LTD', true),
+    (3, 'CMA CGM', true),
+    (4, 'PROCURESHIP', true),
+    (5, 'GARRETS INTERNATIONAL LTD', true),
+    (6, 'BSM CATERING', true),
+    (7, 'MSC SHIPMANAGEMENT', true),
+    (8, 'ANGLO EASTERN', true),
+    (9, 'UMAR', true),
+    (10, 'BERNHARD SCHULTE', true),
+    (11, 'OPERATION3', true)
+ON CONFLICT (broker_name) DO NOTHING;
+
+-- Ajustar secuencia
+SELECT setval('brokers_broker_id_seq', (SELECT MAX(broker_id) FROM brokers));
+
+
+-- ============================================================================
+-- DATOS: broker_formatos (6 registros)
+-- ============================================================================
+INSERT INTO broker_formatos (formato_id, broker_id, version, header_row, archivo_ejemplo, activo) VALUES 
+    (1, 1, '1.0', 12, 'OAS1210RO008910122025150143766.xlsx', true),
+    (2, 2, '1.0', 9, 'QTN_LOU_233.xlsx', true),
+    (3, 3, '1.0', 18, '2679-2025R-0342-1293695-124805 (1).xlsx', true),
+    (4, 4, '1.0', 13, 'ATRA-ST-25-104_3_Valparaiso Ship Services SA (1).xlsx', true),
+    (5, 5, '1.0', 24, 'quotation_RFQ0204875.xlsx', true),
+    (7, 6, '1.0', 18, 'RFQ_EQ_SCF_CISA_0152.xlsm', true)
+ON CONFLICT (broker_id, version) DO UPDATE 
+    SET header_row = EXCLUDED.header_row,
+        archivo_ejemplo = EXCLUDED.archivo_ejemplo,
+        activo = EXCLUDED.activo;
+
+-- Ajustar secuencia
+SELECT setval('broker_formatos_formato_id_seq', (SELECT MAX(formato_id) FROM broker_formatos));
+
+
+-- ============================================================================
+-- NOTA SOBRE DATOS DE formato_columnas y broker_metadata
+-- ============================================================================
+-- Los datos de formato_columnas y broker_metadata son extensos:
+-- 
+-- formato_columnas: 77 registros totales
+--   - Formato 1 (OCEANIC): 15 columnas
+--   - Formato 2 (MCTC): 9 columnas  
+--   - Formato 3 (CMA CGM): 12 columnas
+--   - Formato 4 (PROCURESHIP): 14 columnas
+--   - Formato 5 (GARRETS): 10 columnas
+--   - Formato 7 (BSM CATERING): 17 columnas
+--
+-- broker_metadata: 51 registros totales
+--   - Formato 1 (OCEANIC): 6 campos de metadata
+--   - Formato 2 (MCTC): 4 campos de metadata
+--   - Formato 3 (CMA CGM): 8 campos de metadata
+--   - Formato 4 (PROCURESHIP): 4 campos de metadata
+--   - Formato 5 (GARRETS): 1 campo de metadata
+--   - Formato 7 (BSM CATERING): 28 campos de metadata
+--
+-- Estos datos se generan automáticamente ejecutando:
+--   mvn exec:java -Dexec.mainClass="cl.vsschile.FormatoSaver" \
+--     -Dexec.args="<ruta-al-directorio-BROKERS>"
+--
+-- Para exportar los datos actuales, ejecutar:
+--   pg_dump -U postgres -d sistema_cotizacion_2025 \
+--     -t formato_columnas -t broker_metadata --data-only > datos_formatos.sql
+--
 
 
 -- ============================================================================
