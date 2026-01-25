@@ -61,7 +61,7 @@ public class CotizacionOrganizer {
         File[] files = brokerDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 String lower = name.toLowerCase();
-                return lower.endsWith(".xlsx") || lower.endsWith(".xls");
+                return lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".xlsm");
             }
         });
         
@@ -95,7 +95,8 @@ public class CotizacionOrganizer {
         Workbook workbook = null;
         
         try {
-            if (file.getName().toLowerCase().endsWith(".xlsx")) {
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
                 workbook = new XSSFWorkbook(fis);
             } else {
                 workbook = new HSSFWorkbook(fis);
@@ -107,7 +108,9 @@ public class CotizacionOrganizer {
             info.originalFileName = file.getName();
             
             // Detectar formato y extraer información
-            if (brokerName.contains("MCTC")) {
+            if (brokerName.contains("BSM")) {
+                extractBSMInfo(sheet, info);
+            } else if (brokerName.contains("MCTC")) {
                 extractMCTCInfo(sheet, info);
             } else if (brokerName.contains("OCEANIC")) {
                 extractOceanicInfo(sheet, info);
@@ -129,6 +132,26 @@ public class CotizacionOrganizer {
                 workbook.close();
             }
             fis.close();
+        }
+    }
+    
+    private void extractBSMInfo(Sheet sheet, QuotationInfo info) {
+        // BSM CATERING: Vessel en fila 4 columna O (14), RFQ Number en fila 5 columna O (14)
+        Row row4 = sheet.getRow(3);  // Fila 4 (índice 3)
+        if (row4 != null) {
+            Cell cell = row4.getCell(14);  // Columna O (índice 14)
+            if (cell != null) {
+                info.vesselName = getCellValueAsString(cell);
+            }
+        }
+        
+        // RFQ Number en fila 5 columna O (14)
+        Row row5 = sheet.getRow(4);  // Fila 5 (índice 4)
+        if (row5 != null) {
+            Cell cell = row5.getCell(14);  // Columna O (índice 14)
+            if (cell != null) {
+                info.quotationNumber = getCellValueAsString(cell);
+            }
         }
     }
     
