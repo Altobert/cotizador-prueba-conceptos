@@ -3,6 +3,7 @@ cl/vsschile/FormatoDatabaseManager$MetadataInfo.class
 cl/vsschile/CotizacionViewerApp$ColumnFormat.class
 cl/vsschile/ColumnDetectorTest.class
 cl/vsschile/CotizacionViewerApp.class
+cl/vsschile/GarretsColumnAnalyzer.class
 cl/vsschile/CotizacionViewerApp$2.class
 cl/vsschile/CotizacionViewerApp$5$1.class
 cl/vsschile/FormatoDatabaseManager.class

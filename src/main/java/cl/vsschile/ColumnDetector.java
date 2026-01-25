@@ -221,19 +221,28 @@ public class ColumnDetector {
     /**
      * GARRETS INTERNATIONAL LTD
      * Header en fila 25: No., Part#, Vessel, Description, Quality, Unit, 
-     *                    Quantity, Unit Price, Disc.%, Del. Days
+     *                    Quantity, Unit Price, Disc.%, Del. Days, Seller #,
+     *                    Total Amount, Package Size, Notes, IMPA/ISSA#
      */
     private static void detectGarretsColumns(Sheet sheet, ColumnMapping mapping) {
         Row row = sheet.getRow(24); // Fila 25 (índice 24)
         if (row != null) {
             mapping.headerRow = 24;
             
-            for (int i = 0; i < 20; i++) {
+            // Inicializar columnNames con tamaño suficiente
+            for (int i = 0; i < 25; i++) {
+                mapping.columnNames.add("");
+            }
+            
+            for (int i = 0; i < 25; i++) {
                 Cell cell = row.getCell(i);
                 if (cell != null) {
                     String value = getCellValueAsString(cell);
                     if (value != null && !value.trim().isEmpty()) {
                         String normalized = value.toUpperCase().trim();
+                        
+                        // Guardar el nombre en el índice correcto
+                        mapping.columnNames.set(i, value);
                         
                         if (normalized.equals("NO.") || normalized.equals("NO")) {
                             mapping.columns.put("LINE_NO", i);
@@ -255,9 +264,17 @@ public class ColumnDetector {
                             mapping.columns.put("DISCOUNT", i);
                         } else if (normalized.contains("DEL") && normalized.contains("DAYS")) {
                             mapping.columns.put("DELIVERY_DAYS", i);
+                        } else if (normalized.contains("SELLER")) {
+                            mapping.columns.put("SELLER_NO", i);
+                        } else if (normalized.contains("TOTAL AMOUNT") || (normalized.equals("TOTAL") && !mapping.columns.containsKey("TOTAL"))) {
+                            mapping.columns.put("TOTAL", i);
+                        } else if (normalized.contains("PACKAGE SIZE")) {
+                            mapping.columns.put("PACKAGE_SIZE", i);
+                        } else if (normalized.equals("NOTES")) {
+                            mapping.columns.put("NOTES", i);
+                        } else if (normalized.contains("IMPA") || normalized.contains("ISSA")) {
+                            mapping.columns.put("IMPA_ISSA", i);
                         }
-                        
-                        mapping.columnNames.add(value);
                     }
                 }
             }
@@ -390,6 +407,8 @@ public class ColumnDetector {
                             mapping.columns.put("SDOC", i);
                         } else if (normalized.contains("VENDOR REMARKS")) {
                             mapping.columns.put("VENDOR_REMARKS", i);
+                        } else if (normalized.contains("OFFICE REMARKS") || (normalized.contains("OFFICE") && normalized.contains("REMARKS"))) {
+                            mapping.columns.put("OFFICE_REMARKS", i);
                         }
                     }
                 }

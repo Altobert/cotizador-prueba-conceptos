@@ -109,16 +109,15 @@ public class FormatoDatabaseManager {
             // 2. Verificar si ya existe este formato
             int formatoId = getFormatoId(conn, brokerId, "1.0");
             if (formatoId != -1) {
-                // Actualizar formato existente
+                // Actualizar formato existente (preservando columnas personalizadas)
                 updateFormato(conn, formatoId, mapping.headerRow, archivoEjemplo);
-                // Eliminar columnas antiguas
-                deleteFormatoColumnas(conn, formatoId);
+                // Nota: ya NO eliminamos todas las columnas para preservar columnas custom (ej. PRECIO_VSS)
             } else {
                 // Crear nuevo formato
                 formatoId = insertFormato(conn, brokerId, "1.0", mapping.headerRow, archivoEjemplo);
             }
             
-            // 3. Insertar columnas
+            // 3. Insertar/actualizar columnas detectadas (sin tocar las personalizadas)
             insertColumnas(conn, formatoId, mapping);
             
             conn.commit();
@@ -261,10 +260,16 @@ public class FormatoDatabaseManager {
     
     private void insertColumnas(Connection conn, int formatoId, 
                                ColumnDetector.ColumnMapping mapping) throws SQLException {
-        PreparedStatement ps = null;
+        PreparedStatement psInsert = null;
+        PreparedStatement psDeleteOne = null;
         
         try {
-            ps = conn.prepareStatement(
+            // Borrado selectivo: solo reemplazar las columnas detectadas por el mapeo actual
+            psDeleteOne = conn.prepareStatement(
+                "DELETE FROM formato_columnas WHERE formato_id = ? AND campo_estandar = ?"
+            );
+            
+            psInsert = conn.prepareStatement(
                 "INSERT INTO formato_columnas " +
                 "(formato_id, campo_estandar, nombre_columna_original, indice_columna, letra_columna, " +
                 "color_fondo, color_texto, es_negrita, es_cursiva, tiene_borde) " +
@@ -278,36 +283,43 @@ public class FormatoDatabaseManager {
                     mapping.columnNames.get(indiceColumna) : null;
                 String letraColumna = getColumnLetter(indiceColumna);
                 
-                // Obtener información de estilo
+                // 1) borrar si existe registro previo de ese campo (evita duplicados)
+                psDeleteOne.setInt(1, formatoId);
+                psDeleteOne.setString(2, campoEstandar);
+                psDeleteOne.addBatch();
+                
+                // 2) preparar inserción
                 CellStyleInfo styleInfo = mapping.columnStyles.get(indiceColumna);
                 
-                ps.setInt(1, formatoId);
-                ps.setString(2, campoEstandar);
-                ps.setString(3, nombreOriginal);
-                ps.setInt(4, indiceColumna);
-                ps.setString(5, letraColumna);
+                psInsert.setInt(1, formatoId);
+                psInsert.setString(2, campoEstandar);
+                psInsert.setString(3, nombreOriginal);
+                psInsert.setInt(4, indiceColumna);
+                psInsert.setString(5, letraColumna);
                 
-                // Guardar colores y estilos
                 if (styleInfo != null) {
-                    ps.setString(6, styleInfo.backgroundColor);
-                    ps.setString(7, styleInfo.foregroundColor);
-                    ps.setBoolean(8, styleInfo.isBold);
-                    ps.setBoolean(9, styleInfo.isItalic);
-                    ps.setBoolean(10, styleInfo.hasBorder);
+                    psInsert.setString(6, styleInfo.backgroundColor);
+                    psInsert.setString(7, styleInfo.foregroundColor);
+                    psInsert.setBoolean(8, styleInfo.isBold);
+                    psInsert.setBoolean(9, styleInfo.isItalic);
+                    psInsert.setBoolean(10, styleInfo.hasBorder);
                 } else {
-                    ps.setString(6, null);
-                    ps.setString(7, null);
-                    ps.setBoolean(8, false);
-                    ps.setBoolean(9, false);
-                    ps.setBoolean(10, false);
+                    psInsert.setString(6, null);
+                    psInsert.setString(7, null);
+                    psInsert.setBoolean(8, false);
+                    psInsert.setBoolean(9, false);
+                    psInsert.setBoolean(10, false);
                 }
                 
-                ps.addBatch();
+                psInsert.addBatch();
             }
             
-            ps.executeBatch();
+            // Ejecutar lotes
+            psDeleteOne.executeBatch();
+            psInsert.executeBatch();
         } finally {
-            closeStatement(ps);
+            closeStatement(psInsert);
+            closeStatement(psDeleteOne);
         }
     }
     
