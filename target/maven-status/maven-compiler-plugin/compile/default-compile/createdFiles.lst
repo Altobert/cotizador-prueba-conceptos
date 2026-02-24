@@ -1,10 +1,13 @@
 cl/vsschile/FormatoDatabaseManager$FormatoInfo.class
+cl/vsschile/BSMFormatRegistrar$ColumnaInfo.class
 cl/vsschile/FormatoDatabaseManager$MetadataInfo.class
+cl/vsschile/BSMBorderAnalyzer.class
 cl/vsschile/CotizacionViewerApp$ColumnFormat.class
 cl/vsschile/ColumnDetectorTest.class
 cl/vsschile/CotizacionViewerApp.class
 cl/vsschile/GarretsColumnAnalyzer.class
 cl/vsschile/CotizacionViewerApp$2.class
+cl/vsschile/BSMFormatRegistrar.class
 cl/vsschile/CotizacionViewerApp$5$1.class
 cl/vsschile/FormatoDatabaseManager.class
 cl/vsschile/TemplateRecreator$ColumnInfo.class
@@ -20,6 +23,7 @@ cl/vsschile/FormatoSaver$1.class
 cl/vsschile/RowData.class
 cl/vsschile/CotizacionViewerApp$BrokerFormat.class
 cl/vsschile/ExcelReportGenerator.class
+cl/vsschile/BSMExcelGenerator.class
 cl/vsschile/CotizacionViewerApp$3.class
 cl/vsschile/ColumnDetector$ColumnMapping.class
 cl/vsschile/UpdatePrecioVSSPosition.class
@@ -32,6 +36,7 @@ cl/vsschile/CotizacionOrganizer$1.class
 cl/vsschile/BrokerExcelGenerator.class
 cl/vsschile/ArchivoColorSaver$QuotationInfo.class
 cl/vsschile/TemplateRecreator$FormatInfo.class
+cl/vsschile/BSMFormatRegistrar$MetadataInfo.class
 cl/vsschile/FormatoDatabaseManager$ColumnaInfo.class
 cl/vsschile/CotizacionViewerApp$1.class
 cl/vsschile/InsertPrecioVSS.class
